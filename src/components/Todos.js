@@ -1,15 +1,23 @@
 import "../App.css";
 import {useState} from "react";
+import {auth, firestore} from "../firebase";
+import firebase from "../firebase";
 
 const Todos = () => {
   const [todo, setTodo] = useState("");
+  const todosRef = firestore.collection(`users/${auth.currentUser.uid}/todos`);
   const todos = [];
 
-  const signOut = () => {};
+  const signOut = () => auth.signOut();
 
   const onSubmitTodo = (event) => {
     event.preventDefault();
     setTodo("");
+    todosRef.add({
+      text: "todo",
+      complete: "false",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    })
   };
 
   return(
