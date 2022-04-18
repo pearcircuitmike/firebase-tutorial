@@ -5,7 +5,7 @@ import "firebase/compat/auth";
 import "firebase/compat/functions";
 
 firebase.initializeApp({
-  apiKey: "AIzaSyCjrCyLrKqsrj9TbJiaLCqTZk8_0bmnnpo",
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
   authDomain: "fir-tutorial-793fd.firebaseapp.com",
   projectId: "fir-tutorial-793fd",
   storageBucket: "fir-tutorial-793fd.appspot.com",

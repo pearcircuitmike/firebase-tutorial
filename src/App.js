@@ -1,6 +1,6 @@
 import logo from './logo.svg';
 import './App.css';
-import Todos from './components/Todos.js'
+import Todos from './components/Todos.jsx'
 import {useAuthState} from "react-firebase-hooks/auth";
 import {auth} from "./firebase";
 import firebase from "./firebase";
