@@ -2,11 +2,12 @@ import "../App.css";
 import {useState} from "react";
 import {auth, firestore} from "../firebase";
 import firebase from "../firebase";
+import {useCollectionData} from "react-firebase-hooks/firestore";
 
 const Todos = () => {
   const [todo, setTodo] = useState("");
   const todosRef = firestore.collection(`users/${auth.currentUser.uid}/todos`);
-  const todos = [];
+  const [todos] = useCollectionData(todosRef);
 
   const signOut = () => auth.signOut();
 
