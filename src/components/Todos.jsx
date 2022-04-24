@@ -1,64 +1,86 @@
-import "../App.css";
-import {useState} from "react";
-import {auth, firestore} from "../firebase";
-import firebase from "../firebase";
-import {useCollectionData} from "react-firebase-hooks/firestore";
+
+import { useEffect, useState } from "react";
+import { auth, firestore, functions } from "../firebase";
+import { httpsCallable } from "firebase/functions";
+import {
+  collection,
+  onSnapshot,
+  deleteDoc,
+  serverTimestamp,
+  doc,
+  setDoc,
+} from "firebase/firestore";
+
+const addTodo = httpsCallable(functions, "addTodo");
 
 const Todos = () => {
   const [todo, setTodo] = useState("");
-  const todosRef = firestore.collection(`users/${auth.currentUser.uid}/todos`);
-  const [todos] = useCollectionData(todosRef, { idField: "id" });
+  const [todos, setTodos] = useState([]);
+
+  useEffect(() => {
+    return onSnapshot(
+      collection(firestore, `users/${auth.currentUser.uid}/todos`),
+      (snapshot) => {
+        setTodos(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+      }
+    );
+  }, []);
+
   const signOut = () => auth.signOut();
 
   const onSubmitTodo = (event) => {
     event.preventDefault();
+
     setTodo("");
-    todosRef.add({
+    addTodo({
       text: todo,
       complete: false,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      createdAt: serverTimestamp(),
     });
   };
 
   return (
     <>
       <header>
-        <button onClick = {signOut}>Sign Out</button>
+        <button onClick={signOut}>Sign Out</button>
       </header>
       <main>
-        <form onSubmit = {onSubmitTodo}>
+        <form onSubmit={onSubmitTodo}>
           <input
             required
-            value = {todo}
-            onChange = {(e) => setTodo(e.target.value)}
-            placeholder="what's next?"
-            />
-            <button type="submit"> Add </button>
+            value={todo}
+            onChange={(e) => setTodo(e.target.value)}
+            placeholder="What's Next?"
+          />
+          <button type="submit">Add</button>
         </form>
-        {todos && todos.map((todo)=> <Todo key={todo.id} {...todo} />)}
+        {todos && todos.map((todo) => <Todo key={todo.id} {...todo} />)}
       </main>
     </>
   );
 };
 
-
-const Todo = ({ id, complete, text}) => {
-  const todosRef = firestore.collection(`users/${auth.currentUser.uid}/todos`);
+const Todo = ({ id, complete, text }) => {
   const onCompleteTodo = (id, complete) =>
-    todosRef.doc(id).set({ complete: !complete }, { merge: true });
+    setDoc(
+      doc(firestore, `users/${auth.currentUser.uid}/todos/${id}`),
+      { complete: !complete },
+      { merge: true }
+    );
 
-  const onDeleteTodo = (id) => todosRef.doc(id).delete();
+  const onDeleteTodo = (id) =>
+    deleteDoc(doc(firestore, `users/${auth.currentUser.uid}/todos/${id}`));
 
   return (
     <div key={id} className="todo">
       <button
         className={`todo-item ${complete ? "complete" : ""}`}
         tabIndex="0"
-        onClick={()=> onCompleteTodo(id, complete)}
-        >
-          {text}
-        </button>
-        <button onClick={() => onDeleteTodo(id)}>x</button>
+        onClick={() => onCompleteTodo(id, complete)}
+      >
+        {text}
+      </button>
+      <button onClick={() => onDeleteTodo(id)}>x</button>
     </div>
   );
 };

@@ -1,22 +1,28 @@
-import logo from './logo.svg';
-import './App.css';
-import Todos from './components/Todos.jsx'
-import {useAuthState} from "react-firebase-hooks/auth";
-import {auth} from "./firebase";
-import firebase from "./firebase";
+import Todos from "./components/Todos";
+import { auth } from "./firebase";
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  onAuthStateChanged,
+} from "firebase/auth";
+import { useEffect, useState } from "react";
 
-const signInWithGoogle = () =>
-  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+const sighInWithGoogle = () => signInWithPopup(auth, new GoogleAuthProvider());
 
 const SignIn = () => (
   <main>
-    <button onClick = {signInWithGoogle}>sign in with google </button>
+    <button onClick={sighInWithGoogle}>Sign In With Google</button>
   </main>
 );
 
 const App = () => {
-    const [user] = useAuthState(auth);
-    return user ? <Todos /> : <SignIn />
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    onAuthStateChanged(auth, setUser);
+  }, []);
+
+  return user ? <Todos /> : <SignIn />;
 };
 
 export default App;
